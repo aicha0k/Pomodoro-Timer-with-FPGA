@@ -53,6 +53,7 @@ ARCHITECTURE behavior OF PomodoroOFF IS
     SIGNAL session_count_setting, session_count : INTEGER RANGE 1 TO 5; -- Configurações e contagem de sessões
     SIGNAL session_timer, break_timer : INTEGER RANGE 0 TO CICLES_SECOND; -- Contadores para sessão e intervalo
 	 SIGNAL min_high, min_low, sec_high, sec_low : STD_LOGIC_VECTOR(3 DOWNTO 0);
+	 SIGNAL session_time_setting_high, session_time_setting_low: STD_LOGIC_VECTOR(3 DOWNTO 0);
    
 	-- Declaraçao do decodificador para display de 7 segmentos
     COMPONENT display_7seg IS
@@ -85,17 +86,16 @@ ARCHITECTURE behavior OF PomodoroOFF IS
         );
     END COMPONENT;
 begin
-    --rst <= KEY(2);
-    reset_synch_50mhz_inst : reset_sync
+    --rst <= KEY(4);
+    
+	 reset_synch_50mhz_inst : reset_sync
     PORT MAP(
        i_clk => CLOCK_50MHz,
-       i_external_reset_n => KEY(2),
+      i_external_reset_n => KEY(4),
        o_reset => OPEN,
        o_reset_n => rst
     );
-
-   
-
+	 
     -- Processo principal
     PROCESS (CLOCK_50MHz, rst)
         VARIABLE count : INTEGER RANGE 0 TO CICLES_SECOND := CICLES_SECOND; -- Contador para um segundo
@@ -106,31 +106,50 @@ begin
 	 
         IF rst = '1' THEN
             -- Resetar todas as configurações e parar cronômetro (VOLTAR AO ESTADO INICIAL)
+		min_high <= "0000";
+		min_low <= "0000";	
+		sec_high <= "0000";
+		sec_low <= "0000";
+		
         ELSIF rising_edge(CLOCK_50MHz) THEN
             CASE state IS
                 WHEN 0 =>
+					 min_high <= "0001";
+					 min_low <= "1010";
+					 
 
                     IF key_ready = '1' THEN
-                        CASE key_int IS
-                            WHEN "0001" => --"0001" código para o botão Mais
-                                IF session_time_setting <= 60 THEN
-                                    session_time_setting <= session_time_setting + 1;
-                                END IF;
+						  sec_low<= "1010";
+                        CASE key_data IS
+                            WHEN "0001"=>  --código para o botão Mais
+									 sec_high <= "0001";
+									 sec_low <= "1010";
+--                                IF session_time_setting <= 60 THEN
+--                                    session_time_setting <= session_time_setting + 5;
+                                --END IF;
                             WHEN "0010" => -- "0010" código para o botão Menos
-                                IF session_time_setting > 0 THEN
-                                    session_time_setting <= session_time_setting - 1;
-                                END IF;
+									 sec_low <= "0100";
+--                                IF session_time_setting > 0 THEN
+--                                    session_time_setting <= session_time_setting - 5;
+--												sec_high <= STD_LOGIC_VECTOR(to_unsigned(session_time_setting / 10, 4));
+--                                    sec_low <= STD_LOGIC_VECTOR(to_unsigned(session_time_setting MOD 10, 4));
+                                --END IF;
                             WHEN "0011" => --  "0011" código para o botão Enter
-                                state <= 1; -- Mudar para o próximo estado
+									 sec_low <= "0101";
+                               -- state <= 1; -- Mudar para o próximo estado
                             WHEN OTHERS =>
-                                NULL; -- Nenhuma ação para outros códigos; Em um case ou select statement, é uma boa prática incluir when others para garantir que todos os possíveis valores de entrada sejam considerados, especialmente quando se lida com sinais ou variáveis de largura de bit fixa. Isso ajuda a prevenir comportamentos imprevisíveis ou não definidos.
+                                sec_high <= "0110";
+										  --NULL;
+										  -- Nenhuma ação para outros códigos; Em um case ou select statement, é uma boa prática incluir when others para garantir que todos os possíveis valores de entrada sejam considerados, especialmente quando se lida com sinais ou variáveis de largura de bit fixa. Isso ajuda a prevenir comportamentos imprevisíveis ou não definidos.
                         END CASE;
                     END IF;
 
                 WHEN 1 =>
                     -- Lógica para configurar o número de sessões
+						  min_high <= "0010";
+					     min_low <= "1010";
                     IF key_ready = '1' THEN
-                        CASE key_int IS
+                        CASE key_data IS
                             WHEN "0001" =>
                                 IF session_count_setting < 5 THEN -- Supondo um máximo de 5 sessões
                                     session_count_setting <= session_count_setting + 1;
@@ -148,14 +167,14 @@ begin
                 WHEN 2 =>
                     -- Lógica para configurar o tempo de intervalo
                     IF key_ready = '1' THEN
-                        CASE key_int IS
+                        CASE key_data IS
                             WHEN "0001" =>
                                 IF break_time_setting <= 60 THEN
-                                    break_time_setting <= break_time_setting + 1;
+                                    break_time_setting <= break_time_setting + 5;
                                 END IF;
                             WHEN "0010" =>
                                 IF break_time_setting > 0 THEN
-                                    break_time_setting <= break_time_setting - 1;
+                                    break_time_setting <= break_time_setting - 5;
                                 END IF;
                             WHEN "0100" => -- Código para o botão Start
                                 session_timer <= session_time_setting; -- Inicializar o contador da sessão com o tempo definido (*60)
@@ -186,10 +205,10 @@ begin
                             sec_low <= STD_LOGIC_VECTOR(to_unsigned(seconds MOD 10, 4));
 
                             -- Atualizar os displays
-                            DISP0_D <= disp_7seg(min_high) ; -- Display para dezena dos minutos
-                            DISP1_D <= min_low; -- Display para unidade dos minutos
-                            DISP2_D <= sec_high; -- Display para dezena dos segundos
-                            DISP3_D <= sec_low; -- Display para unidade dos segundos
+                           -- DISP0_D <= disp_7seg(min_high) ; -- Display para dezena dos minutos
+                           -- DISP1_D <= min_low; -- Display para unidade dos minutos
+                           -- DISP2_D <= sec_high; -- Display para dezena dos segundos
+                           -- DISP3_D <= sec_low; -- Display para unidade dos segundos
                         END IF;
                     ELSE
                         state <= 4; -- Mudar para o estado do intervalo
@@ -213,10 +232,10 @@ begin
                             sec_high <= STD_LOGIC_VECTOR(to_unsigned(seconds / 10, 4));
                             sec_low <= STD_LOGIC_VECTOR(to_unsigned(seconds MOD 10, 4));
                             -- Atualizar os displays
-                            DISP0_D <= min_high; -- Display para dezena dos minutos
-                            DISP1_D <= min_low; -- Display para unidade dos minutos
-                            DISP2_D <= sec_high; -- Display para dezena dos segundos
-                            DISP3_D <= sec_low; -- Display para unidade dos segundos
+                           -- DISP0_D <= min_high; -- Display para dezena dos minutos
+                            --DISP1_D <= min_low; -- Display para unidade dos minutos
+                            --DISP2_D <= sec_high; -- Display para dezena dos segundos
+                            --DISP3_D <= sec_low; -- Display para unidade dos segundos
 
                         END IF;
                     ELSE
@@ -229,6 +248,15 @@ begin
         END IF;
     END PROCESS;
 
+---------------------------------------------------------------CASO 1 ESCOLHENDO QUANTAS SESSÕES--------------------------------------------------------------	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
     -- Display de 7 segmentos da dezena dos minutos
 	conversor_7seg_1:
 	display_7seg 
@@ -237,7 +265,6 @@ begin
 		data_i		=> min_high(3 downto 0),
 		disp_7seg_o	=> DISP0_D (6 downto 0)
 	);
-	
 	
 	-- Display de 7 segmentos da unidade dos minutos
 	conversor_7seg_2:

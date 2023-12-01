@@ -30,16 +30,18 @@ architecture behavior of Botao_base is
 	signal flag		: std_logic;
    signal key_int	: std_logic_vector (3 downto 0);
 	
+	
 begin
 	
 	-- Lógica para saída de acordo com o botão pressionado
 	
-   key_int <=  "0001" when push_button_i = "000000000001" else -- 1 botão 'mais'
-               "0010" when push_button_i = "000000000010" else -- 2 botão 'menos'
-               "0011" when push_button_i = "000000000100" else -- 3 botão 'enter'
-               "0100" when push_button_i = "000000001000" else -- 4 botão 'start'
-               "0101" when push_button_i = "000000010000" else -- 5 botão 'reset'
+   key_int <=  "0001" when push_button_i = "00001" else -- 1 botão 'mais'
+               "0010" when push_button_i = "00010" else -- 2 botão 'menos'
+               "0011" when push_button_i = "00100" else -- 3 botão 'enter'
+               "0100" when push_button_i = "01000" else -- 4 botão 'start'
+               "0101" when push_button_i = "10000" else -- 5 botão 'reset'
                "1111"; -- saída padrão (nenhum botão pressionado)
+
 					
 	--Logica de Debounce, para filtrar o ruído de tripidação do botão
    process (clk_i)
