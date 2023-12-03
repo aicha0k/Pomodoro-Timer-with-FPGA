@@ -21,42 +21,53 @@ port(
 		clk_i				:	in std_logic;
 		push_button_i		:	in std_logic_vector (4 downto 0);
 		key_o				: 	out std_logic_vector (3 downto 0);
-        ready_o 			:	out std_logic
+      ready_o 			:	out std_logic
 	);
 end Botao_base;
 
 architecture behavior of Botao_base is
 
-	signal flag		: std_logic;
+	signal flag		: std_logic := '0';
    signal key_int	: std_logic_vector (3 downto 0);
+	
 	
 begin
 	
 	-- Lógica para saída de acordo com o botão pressionado
 	
-   key_int <=  "0001" when push_button_i = "000000000001" else -- 1 botão 'mais'
-               "0010" when push_button_i = "000000000010" else -- 2 botão 'menos'
-               "0011" when push_button_i = "000000000100" else -- 3 botão 'enter'
-               "0100" when push_button_i = "000000001000" else -- 4 botão 'start'
-               "0101" when push_button_i = "000000010000" else -- 5 botão 'reset'
+   key_int <=  "0001" when push_button_i = "00110" else -- 1 botão 'mais'
+               "0010" when push_button_i = "00101" else -- 2 botão 'menos'
+               "0011" when push_button_i = "00011" else -- 3 botão 'enter'
+               "0100" when push_button_i = "01111" else -- 4 botão 'start'
+               "0101" when push_button_i = "10111" else -- 5 botão 'reset'
                "1111"; -- saída padrão (nenhum botão pressionado)
+
 					
 	--Logica de Debounce, para filtrar o ruído de tripidação do botão
    process (clk_i)
       variable count : integer range 1 to DEBOUNCE := 1;
    begin
    if rising_edge(clk_i) then
-      ready_o <= '0';
+      if  count < DEBOUNCE and key_int /= "1111" and flag = '1' then
+            ready_o <= '0';
+      end if;
       if count < DEBOUNCE then
          count := count + 1;
       elsif key_int /= "1111"  then
          count := 1;
-         ready_o <= '1';
          key_o <= key_int;
+			if flag = '0' then
+				flag <= '1';
+            ready_o <= '1';
+			end if;
       end if;
       if  count < DEBOUNCE and key_int = "1111" then
          count := 1;
+			flag <= '0';
+            ready_o <= '0';
       end if;
+		
+		
    end if;
    end process;
 end behavior;	

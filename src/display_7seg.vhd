@@ -19,25 +19,25 @@ end display_7seg;
 architecture behavior of display_7seg is
 begin
 
-	disp_7seg_o <= "0111111" when data_i = x"0" else -- 0
-						"0000110" when data_i = x"1" else -- 1
-						"1011011" when data_i = x"2" else -- 2
-						"1001111" when data_i = x"3" else -- 3
+	disp_7seg_o <= "1000000" when data_i = x"0" else -- 0
+						"1111001" when data_i = x"1" else -- 1
+						"0100100" when data_i = x"2" else -- 2
+						"0110000" when data_i = x"3" else -- 3
 					
-						"1100110" when data_i = x"4" else -- 4
-						"1101101" when data_i = x"5" else -- 5
-						"1111101" when data_i = x"6" else -- 6
-						"0000111" when data_i = x"7" else -- 7
+						"0011001" when data_i = x"4" else -- 4
+						"0010010" when data_i = x"5" else -- 5
+						"0000010" when data_i = x"6" else -- 6
+						"1111000" when data_i = x"7" else -- 7
 						
-						"1111111" when data_i = x"8" else -- 8
-						"1100111" when data_i = x"9" else -- 9
-						"1110111" when data_i = x"A" else -- A
+						"0000000" when data_i = x"8" else -- 8
+						"0011000" when data_i = x"9" else -- 9
+						--"0001000" when data_i = x"A" else -- A
 						"1111100" when data_i = x"B" else -- B
 						
 						"0111001" when data_i = x"C" else -- C
 						"1011110" when data_i = x"D" else -- D
 						"1111001" when data_i = x"E" else -- E
 						"1110001" when data_i = x"F" else	  -- F
-                        "0000001" when data_i = x"10"; -- Hífen '-'
+                        "0111111" when data_i = x"A"; -- Hífen '-'
 				
 end behavior;
