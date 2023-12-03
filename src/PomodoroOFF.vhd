@@ -1,31 +1,31 @@
---Funcionamento do Relógio Pomodoro nos 4 display de 7 segmentos com o controle dos 5 botões: 
---Primeiro o usuário deverá colocar o tempo de sessão o qual deve aparecer nos diplays de 7 segmentos 1('1') E 2 ('-')
---e no display 3 (minutos a ser colocado pelo usuario com o botão de mais e menos) e no display 4('0' pois o tempo de sessão só se mexe nos minutos)
---Após colocar os minutos ele deve apertar enter para ir para a próxima etapa que é quantas sessões ele quer fazer
--- o display 1 ('2') e o display 2 ('-'), e no display 3('0' pois o numero de sessões varia na unidade) 
---no display 4(quantidade de 1 a 5 sessões o qual o usuário ira ajustar com o botao de + e -)
---Após colocar a quantidade de sessões ele deve apertar enter para ir para a próxima etapa que é o tempo de descanso
---o display 1('3') e o display 2 ('-'), e no display 3(minutos a ser colocado pelo usuario com o botão de mais e menos) e no display 4('0' pois o tempo de descanso só se mexe nos minutos)
---Após colocar os minutos ele deve apertar enter para ir para a próxima etapa que mostrará no display o tempo de sessão que o o usuário escolheu
---indicando que ja esta tudo pronto e o usuario pode apertar o botão de start para começar a contagem regressiva
+--Funcionamento do RelÃ³gio Pomodoro nos 4 display de 7 segmentos com o controle dos 5 botÃµes: 
+--Primeiro o usuÃ¡rio deverÃ¡ colocar o tempo de sessÃ£o o qual deve aparecer nos diplays de 7 segmentos 1('1') E 2 ('-')
+--e no display 3 (minutos a ser colocado pelo usuario com o botÃ£o de mais e menos) e no display 4('0' pois o tempo de sessÃ£o sÃ³ se mexe nos minutos)
+--ApÃ³s colocar os minutos ele deve apertar enter para ir para a prÃ³xima etapa que Ã© quantas sessÃµes ele quer fazer
+-- o display 1 ('2') e o display 2 ('-'), e no display 3('0' pois o numero de sessÃµes varia na unidade) 
+--no display 4(quantidade de 1 a 5 sessÃµes o qual o usuÃ¡rio ira ajustar com o botao de + e -)
+--ApÃ³s colocar a quantidade de sessÃµes ele deve apertar enter para ir para a prÃ³xima etapa que Ã© o tempo de descanso
+--o display 1('3') e o display 2 ('-'), e no display 3(minutos a ser colocado pelo usuario com o botÃ£o de mais e menos) e no display 4('0' pois o tempo de descanso sÃ³ se mexe nos minutos)
+--ApÃ³s colocar os minutos ele deve apertar enter para ir para a prÃ³xima etapa que mostrarÃ¡ no display o tempo de sessÃ£o que o o usuÃ¡rio escolheu
+--indicando que ja esta tudo pronto e o usuario pode apertar o botÃ£o de start para comeÃ§ar a contagem regressiva
 --Deve mostrar no display 1(dezewna do minuto) 2(unidade do minuto) 3(dezena do segundo) 4(unidade do segundo)
---Quando o tempo de sessão acabar deve mostrar no display 1('0') 2('0') 3('0') 4('0') e começar a contagem regressiva do tempo de descanso
---Quando o tempo de descanso acabar deve mostrar no display 1('0') 2('0') 3('0') 4('0') e começar a contagem regressiva do tempo de sessão novamente
---assim, até que termine a quantidade das sessões escolhidas pelo usuário
+--Quando o tempo de sessÃ£o acabar deve mostrar no display 1('0') 2('0') 3('0') 4('0') e comeÃ§ar a contagem regressiva do tempo de descanso
+--Quando o tempo de descanso acabar deve mostrar no display 1('0') 2('0') 3('0') 4('0') e comeÃ§ar a contagem regressiva do tempo de sessÃ£o novamente
+--assim, atÃ© que termine a quantidade das sessÃµes escolhidas pelo usuÃ¡rio
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.std_logic_unsigned.ALL;
 USE ieee.numeric_std.ALL;
 -- Funcionamento:
---  O diplay 7 segmentos mostrará os valores 
+--  O diplay 7 segmentos mostrarÃ¡ os valores 
 --  de minutos e segundos. A contagem
---  será controlada pelos botões:--
+--  serÃ¡ controlada pelos botÃµes:--
 --  KEY (5) : para a contagem (RESET)?????????
 
 ENTITY PomodoroOFF IS
     GENERIC (
-        DEBOUNCE : INTEGER := 2500000; -- filtro ruido de trepidaçao, 2500000*20ns = 50ms
+        DEBOUNCE : INTEGER := 2500000; -- filtro ruido de trepidaÃ§ao, 2500000*20ns = 50ms
         CICLES_SECOND : INTEGER := 50000000 -- Frequencia do clock em Hz
     );
     PORT (
@@ -47,17 +47,18 @@ ARCHITECTURE behavior OF PomodoroOFF IS
     SIGNAL var_seg : STD_LOGIC_VECTOR (7 DOWNTO 0);
 	 signal key_int	: std_logic_vector (3 downto 0);
 	 
- -- Declarações dos sinais
+ -- DeclaraÃ§Ãµes dos sinais
     SIGNAL state : INTEGER RANGE 0 TO 4; -- Estado atual
-    SIGNAL session_time_setting: INTEGER RANGE 0 TO 60 :=0; -- Configurações de tempo de sessão e interval
-	 SIGNAL break_time_setting : INTEGER RANGE 0 TO 60:=0; -- Configurações de tempo de sessão e intervalo
+    SIGNAL session_time_setting: INTEGER RANGE 0 TO 60 :=0; -- ConfiguraÃ§Ãµes de tempo de sessÃ£o e interval
+	 SIGNAL break_time_setting : INTEGER RANGE 0 TO 60:=0; -- ConfiguraÃ§Ãµes de tempo de sessÃ£o e intervalo
 	 
-    SIGNAL session_count_setting, session_count : INTEGER RANGE 1 TO 5; -- Configurações e contagem de sessões
-    SIGNAL session_timer, break_timer : INTEGER RANGE 0 TO CICLES_SECOND; -- Contadores para sessão e intervalo
+    SIGNAL session_count_setting, session_count : INTEGER RANGE 1 TO 5; -- ConfiguraÃ§Ãµes e contagem de sessÃµes
+    SIGNAL session_timer, break_timer : INTEGER RANGE 0 TO CICLES_SECOND; -- Contadores para sessÃ£o e intervalo
 	 SIGNAL min_high, min_low, sec_high, sec_low : STD_LOGIC_VECTOR(3 DOWNTO 0);
 	 SIGNAL session_time_setting_high, session_time_setting_low: STD_LOGIC_VECTOR(3 DOWNTO 0);
+	 SIGNAL session_minutes, session_seconds : INTEGER RANGE 0 TO 60;
    
-	-- Declaraçao do decodificador para display de 7 segmentos
+	-- DeclaraÃ§ao do decodificador para display de 7 segmentos
     COMPONENT display_7seg IS
         PORT (
             data_i : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -65,7 +66,7 @@ ARCHITECTURE behavior OF PomodoroOFF IS
 
         );
     END COMPONENT;
-    -- Declaraçao do teclado
+    -- DeclaraÃ§ao do teclado
     COMPONENT Botao_base IS
         GENERIC (
             DEBOUNCE : INTEGER
@@ -78,7 +79,7 @@ ARCHITECTURE behavior OF PomodoroOFF IS
         );
     END COMPONENT;
 
-    -- Declaração sincronizador de reset
+    -- DeclaraÃ§Ã£o sincronizador de reset
     COMPONENT reset_sync
         PORT (
             i_clk : IN STD_LOGIC;
@@ -106,7 +107,7 @@ begin
 			
     BEGIN
 	 
-        IF rst = '1' THEN -- Resetar todas as configurações e parar cronômetro (VOLTAR AO ESTADO INICIAL)
+        IF rst = '1' THEN -- Resetar todas as configuraÃ§Ãµes e parar cronÃ´metro (VOLTAR AO ESTADO INICIAL)
 		  min_high <= "0000";
 		  min_low <= "0000";
 		  sec_high <= "0000";
@@ -115,28 +116,28 @@ begin
 			
         ELSIF rising_edge(CLOCK_50MHz) THEN
            CASE state IS
-                WHEN 0 =>
+                WHEN 0 =>	-- LÃ³gica para configurar o tempo de sessÃ£o
 						 min_high <= "0001";
 						 min_low <= "1010";
 					 
 											IF key_ready = '1' THEN
 											  CASE key_data IS
-												  WHEN "0001"=>  -- Botão Mais
+												  WHEN "0001"=>  -- BotÃ£o Mais
 														IF session_time_setting <= 55 THEN
 															 session_time_setting <= session_time_setting + 5;
 														ELSE
-															 session_time_setting <= 60; -- Limita o valor máximo em 60
+															 session_time_setting <= 60; -- Limita o valor mÃ¡ximo em 60
 														END IF;
-												  WHEN "0010" => -- Botão Menos
+												  WHEN "0010" => -- BotÃ£o Menos
 														IF session_time_setting >= 5 THEN
 															 session_time_setting <= session_time_setting - 5;
 														ELSE
-															 session_time_setting <= 0; -- Limita o valor mínimo em 0
+															 session_time_setting <= 0; -- Limita o valor mÃ­nimo em 0
 														END IF;
 													WHEN "0011" =>
-														state <= 1; -- Mudar para o próximo estado
+														state <= 1; -- Mudar para o prÃ³ximo estado
 													WHEN OTHERS =>
-														  NULL; -- Nenhuma ação para outros códigos
+														  NULL; -- Nenhuma aÃ§Ã£o para outros cÃ³digos
 													-- Atualiza 'sec_high' e 'sec_low' fora do CASE para garantir que sejam atualizados corretamente.
 												END CASE;
 										end if;
@@ -149,86 +150,105 @@ begin
                 WHEN 1 =>
 					    min_high <= "0010";
 						 min_low <= "1010";
-                    -- Lógica para configurar o número de sessões
+                    -- LÃ³gica para configurar o nÃºmero de sessÃµes
                     			IF key_ready = '1' THEN
 											  CASE key_data IS
-												  WHEN "0001"=>  -- Botão Mais
+												  WHEN "0001"=>  -- BotÃ£o Mais
 														IF session_count_setting <= 4 THEN
 															 session_count_setting <= session_count_setting + 1;
 														ELSE
-															 session_count_setting <= 5; -- Limita o valor máximo em 5
+															 session_count_setting <= 5; -- Limita o valor mÃ¡ximo em 5
 														END IF;
-												  WHEN "0010" => -- Botão Menos
+												  WHEN "0010" => -- BotÃ£o Menos
 														IF session_count_setting >= 2 THEN
 															 session_count_setting <= session_count_setting - 1;
 														ELSE
-															 session_count_setting <= 1; -- Limita o valor mínimo em 0
+															 session_count_setting <= 1; -- Limita o valor mÃ­nimo em 0
 														END IF;
 													WHEN "0011" =>
-														state <= 0; -- Mudar para o próximo estado - no caso ele ta voltando agora pq estamos testando
+														state <= 0; -- Mudar para o prÃ³ximo estado - no caso ele ta voltando agora pq estamos testando
 													WHEN OTHERS =>
-														  NULL; -- Nenhuma ação para outros códigos
+														  NULL; -- Nenhuma aÃ§Ã£o para outros cÃ³digos
 													-- Atualiza 'sec_high' e 'sec_low' fora do CASE para garantir que sejam atualizados corretamente.
 												END CASE;
 										end if;
 											 sec_high <= STD_LOGIC_VECTOR(to_unsigned(session_count_setting / 10, 4));
 											 sec_low <= STD_LOGIC_VECTOR(to_unsigned(session_count_setting MOD 10, 4));
+											 -- Atualizar os displays
+
 
 					WHEN 2 =>
 					 min_high <= "0011";
 					 min_low <= "1010";
-                    -- Lógica para configurar o tempo de intervalo
+                    -- LÃ³gica para configurar o tempo de intervalo
                     IF key_ready = '1' THEN
                         CASE key_data IS
-												  WHEN "0001"=>  -- Botão Mais
+												  WHEN "0001"=>  -- BotÃ£o Mais
 														IF break_time_setting <= 55 THEN
 															 break_time_setting <= break_time_setting + 5;
 														ELSE
-															 break_time_setting <= 60; -- Limita o valor máximo em 60
+															 break_time_setting <= 60; -- Limita o valor mÃ¡ximo em 60
 														END IF;
-												  WHEN "0010" => -- Botão Menos
+												  WHEN "0010" => -- BotÃ£o Menos
 														IF break_time_setting >= 5 THEN
 															 break_time_setting <= break_time_setting - 5;
 														ELSE
-															 break_time_setting <= 0; -- Limita o valor mínimo em 0
+															 break_time_setting <= 0; -- Limita o valor mÃ­nimo em 0
 														END IF;
 													WHEN "0011" =>
-														state <= 3; -- Mudar para o próximo estado
+														state <= 3; -- Mudar para o prÃ³ximo estado
 													WHEN OTHERS =>
-														  NULL; -- Nenhuma ação para outros códigos
+														  NULL; -- Nenhuma aÃ§Ã£o para outros cÃ³digos
 													-- Atualiza 'sec_high' e 'sec_low' fora do CASE para garantir que sejam atualizados corretamente.
 												END CASE;
                     END IF;
 									sec_high <= STD_LOGIC_VECTOR(to_unsigned(break_time_setting / 10, 4));
 									sec_low <= STD_LOGIC_VECTOR(to_unsigned(break_time_setting MOD 10, 4));
---                WHEN 3 =>
---                    -- Lógica para a contagem regressiva da sessão
---                    IF session_timer > 0 THEN
---                        count := count - 1;
---                        IF count = 0 THEN
---                            count := CICLES_SECOND;
---                            session_timer <= session_timer - 1; -- Decrementar o contador da sessão
---
---                            -- Converter o tempo para minutos e segundos
---                            minutes := session_timer / 60;
---                            seconds := session_timer MOD 60; -- mod é o operador de módulo
---
---                            -- Separar os dígitos dos minutos e segundos
---                            min_high <= STD_LOGIC_VECTOR(to_unsigned(minutes / 10, 4)); -- to_unsigned converte um inteiro para um vetor de bits
---                            min_low <= STD_LOGIC_VECTOR(to_unsigned(minutes MOD 10, 4)); -- std_logic_vector converte um vetor de bits para um vetor de bits
---                            sec_high <= STD_LOGIC_VECTOR(to_unsigned(seconds / 10, 4));
---                            sec_low <= STD_LOGIC_VECTOR(to_unsigned(seconds MOD 10, 4));
---
---                            -- Atualizar os displays
---                           -- DISP0_D <= disp_7seg(min_high) ; -- Display para dezena dos minutos
---                           -- DISP1_D <= min_low; -- Display para unidade dos minutos
---                           -- DISP2_D <= sec_high; -- Display para dezena dos segundos
---                           -- DISP3_D <= sec_low; -- Display para unidade dos segundos
---                        END IF;
---                    ELSE
---                        state <= 4; -- Mudar para o estado do intervalo
---
---                    END IF;
+                	WHEN 3 =>
+					-- LÃ³gica para mostrar o tempo de sessÃ£o e iniciar a contagem regressiva
+						session_timer <= session_time_setting * 60; -- Inicializar o contador da sessÃ£o
+						break_timer <= break_time_setting; -- Inicializar o contador do intervalo
+						session_count <= session_count_setting; -- Inicializar o contador de sessÃµes
+
+						session_minutes <= session_time_setting;
+						session_seconds <= 0;
+						min_high <= STD_LOGIC_VECTOR(to_unsigned(session_minutes / 10, 4));
+						min_low <= STD_LOGIC_VECTOR(to_unsigned(session_minutes MOD 10, 4));
+						sec_high <= STD_LOGIC_VECTOR(to_unsigned(session_seconds / 10, 4));
+						sec_low <= STD_LOGIC_VECTOR(to_unsigned(session_seconds MOD 10, 4));
+						-- Atualizar os displays
+
+					
+							if CLOCK_50MHz = '1' then
+								if session_timer > 0 then
+									
+									session_timer <= session_timer - 1; -- Decrementar o contador da sessÃ£o
+									session_minutes <= session_timer / 60;
+									session_seconds <= session_timer MOD 60;
+
+									min_high <= STD_LOGIC_VECTOR(to_unsigned(session_minutes / 10, 4));
+									min_low <= STD_LOGIC_VECTOR(to_unsigned(session_minutes MOD 10, 4));
+									sec_high <= STD_LOGIC_VECTOR(to_unsigned(session_seconds / 10, 4));
+									sec_low <= STD_LOGIC_VECTOR(to_unsigned(session_seconds MOD 10, 4));
+									-- Atualizar os displays
+
+								else	-- quando chegar em zero, decrementa o contador de sessÃµes
+									state <= 4;
+								end if;
+							end if;
+						
+					--WHEN 4 =>
+					-- LÃ³gica para a contagem regressiva da sessÃ£o de descanso
+
+
+
+
+									-- Converter o tempo para minutos e segundos
+									
+
+
+--                    -- LÃ³gica para a contagem regressiva da sessÃ£o
+
 --                WHEN 4 =>
 --                    IF break_timer > 0 THEN
 --                        count := count - 1;
@@ -241,7 +261,7 @@ begin
 --                            seconds := break_timer MOD 60;
 --									 
 --
---                            -- Separar os dígitos dos minutos e segundos
+--                            -- Separar os dÃ­gitos dos minutos e segundos
 --                            min_high <= STD_LOGIC_VECTOR(to_unsigned(minutes / 10, 4));
 --                            min_low <= STD_LOGIC_VECTOR(to_unsigned(minutes MOD 10, 4));
 --                            sec_high <= STD_LOGIC_VECTOR(to_unsigned(seconds / 10, 4));
@@ -263,7 +283,8 @@ begin
         END IF;
     END PROCESS;
 
----------------------------------------------------------------CASO 1 ESCOLHENDO QUANTAS SESSÕES--------------------------------------------------------------	 
+
+---------------------------------------------------------------CASO 1 ESCOLHENDO QUANTAS SESSÃ•ES--------------------------------------------------------------	 
 	 
 	 
 	 
